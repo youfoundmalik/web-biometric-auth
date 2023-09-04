@@ -13,6 +13,8 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* <Route path='/' element={<Auth />} />
+        <Route path='/dashboard' element={<Dashboard />} /> */}
         <Route element={<UnAuthenticatedRoutes />}>
           <Route path='/' element={<Auth />} />
         </Route>
