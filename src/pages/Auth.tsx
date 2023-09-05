@@ -1,22 +1,59 @@
-import { SyntheticEvent, useRef, useState } from 'react';
-import '@passageidentity/passage-auth';
+import { SyntheticEvent, useContext, useRef, useState } from 'react';
+import { client } from '@passwordless-id/webauthn';
+import { Button } from '@chakra-ui/react';
+import { StoreContext } from '../App';
+
+import icon from '../assets/icon.png';
 
 const Auth = () => {
   const [show, setShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [active, setActive] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+  const { setUser } = useContext(StoreContext);
+
+  const handleSubmit = async (
+    e: SyntheticEvent<HTMLFormElement, SubmitEvent>
+  ) => {
     e.preventDefault();
+    setIsLoading(true);
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
-    console.log(email, password);
+
+    await client.isLocalAuthenticator();
+
+    const challenge = '56535b13-5d93-4194-a282-f234c1c24500';
+
+    try {
+      // setTimeout(() => {
+      //   setUser?.({ email, password });
+      // }, 10000);
+      await client.authenticate(
+        ['3924HhJdJMy_svnUowT8eoXrOOO6NLP8SK85q2RPxdU'],
+        challenge,
+        {
+          authenticatorType: 'auto',
+          userVerification: 'required',
+          timeout: 60000,
+        }
+      );
+      setIsLoading(false);
+      setUser?.({ email, password });
+    } catch (error) {
+      console.log(11, error);
+      setIsLoading(false);
+      setUser?.({ email, password });
+    }
   };
 
   return (
     <section className='w-screen h-screen flex items-center justify-center'>
-      <div className='border border-black border-opacity-20 px-2 py-5 md:px-5 md:py-7 rounded-md w-full m-3 md:w-1/2 lg:w-1/3'>
+      <div className='border border-black border-opacity-20 px-2 py-7 md:px-5 md:py-7 rounded-md w-full m-3 md:w-1/2 lg:w-1/3'>
+        <div className='w-[20%] mb-3'>
+          <img alt='authenticate' src={icon} />
+        </div>
         <h3 className='font-bold text-[30px]'>Welcome!</h3>
         <p>Please enter your login credentials to continue</p>
         <form
@@ -72,12 +109,16 @@ const Auth = () => {
               )}
             </div>
           </div>
-          <button
+          <Button
             type='submit'
-            className='h-[50px] w-full mt-5 border-none bg-cyan-600 rounded text-white'
+            isLoading={isLoading}
+            loadingText='Submitting'
+            colorScheme='teal'
+            size='lg'
+            className='h-[50px] w-full mt-5 rounded outline-none'
           >
             Sign In
-          </button>
+          </Button>
         </form>
       </div>
     </section>
