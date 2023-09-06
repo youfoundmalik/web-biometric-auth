@@ -34,7 +34,7 @@ const Auth = () => {
         ['3924HhJdJMy_svnUowT8eoXrOOO6NLP8SK85q2RPxdU'],
         challenge,
         {
-          authenticatorType: 'auto',
+          authenticatorType: 'local',
           userVerification: 'required',
           timeout: 60000,
         }
